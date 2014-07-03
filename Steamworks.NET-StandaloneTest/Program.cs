@@ -10,10 +10,10 @@ namespace SteamworksNET_StandaloneTest
     class Program
     {
 	    private static bool _steamInited;
-		private static 	SteamAPIWarningMessageHook_t SteamAPIWarningMessageHook;
+		//private static 	SteamAPIWarningMessageHook_t SteamAPIWarningMessageHook;
  
-	    private static AutoResetEvent _waitForCallback;
-	    private static CGameID _gameId;
+	    
+	    
 
 	    static void Main(string[] args)
         {
@@ -24,7 +24,7 @@ namespace SteamworksNET_StandaloneTest
 	        }
 
 		    _steamInited = SteamAPI.Init();
-		    _gameId = new CGameID(SteamUtils.GetAppID());
+		  //  var gameId = new CGameID(SteamUtils.GetAppID());
 		    Thread.Sleep(100);
 
             if(!_steamInited)
@@ -34,32 +34,20 @@ namespace SteamworksNET_StandaloneTest
             }
 			Console.WriteLine("Packsize.Test() returned: {0}", Packsize.Test());
 
-			SteamAPIWarningMessageHook = new SteamAPIWarningMessageHook_t(SteamAPIDebugTextHook);
-			SteamClient.SetWarningMessageHook(SteamAPIWarningMessageHook);
-
-			Callback<UserStatsReceived_t>.Create(OnUserStatsReceived);
+//			SteamAPIWarningMessageHook = new SteamAPIWarningMessageHook_t(SteamAPIDebugTextHook);
+//			SteamClient.SetWarningMessageHook(SteamAPIWarningMessageHook);
 		    
+		    var callback = Callback<UserStatsReceived_t>.Create(OnUserStatsReceived);
+			SteamUserStats.RequestCurrentStats();
 		    //    Callback<LeaderboardScoresDownloaded_t>.Create(OnLeaderboardDataReceived);
 			
-
-			Task.Factory.StartNew(() => {
-				                            while (true)
-				                            {
-					                            SteamAPI.RunCallbacks();
-												Thread.Sleep(100);
-				                            }
-				}
-			);
-
-		    _waitForCallback = new AutoResetEvent(false);
-		    _waitForCallback.WaitOne();
-
-//		    while (!Console.KeyAvailable)
-//            {
-//                SteamAPI.RunCallbacks();
-//				Console.Write("+");
-//                Thread.Sleep(100);
-//            }
+			
+		    while (!Console.KeyAvailable)
+            {
+                SteamAPI.RunCallbacks();
+				Console.Write("+");
+                Thread.Sleep(100);
+            }
 
             SteamAPI.Shutdown();
         }
@@ -82,7 +70,7 @@ namespace SteamworksNET_StandaloneTest
 			int totalGamesPlayed;
 			SteamUserStats.GetStat("NumGames", out totalGamesPlayed);
 			Console.WriteLine("Games played {0}", totalGamesPlayed);
-		    _waitForCallback.Set();
+		    
 
 	    }
 
